@@ -439,19 +439,6 @@ class Wishlist_Controller extends RestController
                                     'message'   => 'Data not found!'
                                     );
                 }
-
-                $filter_wishlist = array();
-
-                if ( !in_array( $user_type, array(1,2) ) )
-                {
-                    // not superadmin & admin user
-                    $filter_wishlist['user_id'] = $user_id;
-                }
-
-                if ( !empty($id) )
-                {
-                    $filter_wishlist['id'] = $id;
-                }
             }
             else
             {
