@@ -88,5 +88,39 @@ class WishlistItem_Model extends CI_Model
 
 		return $rst;
 	}
+	
+	public function delete_data_multiple($filters=array(), $deleted_by)
+	{
+		$data = array(
+						'deleted_at' => getDateTime(),
+						'deleted_by' => $deleted_by,
+					);
+
+		$db = $this->db;
+		$rst = 0;
+
+		if ( isset($filters['id']) || isset($filters['wishlist_id']) )
+		{
+			if ( count($filters) > 0 )
+			{
+				foreach ( $filters as $key => $val )
+				{
+					if ( is_array($val) && count($val) > 0 )
+					{
+						$db->where_in($key, $val);	
+					}
+					else
+					{
+						$db->where($key, $val);	
+					}	
+				}
+			}
+
+			$db->update($this->table, $data);
+			$rst = $db->affected_rows();
+		}
+
+		return $rst;
+	}
 }
 ?>

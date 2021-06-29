@@ -355,4 +355,118 @@ class Wishlist_Controller extends RestController
             $this->response($data_token['result'], $data_token['status']);   
         }
     }
+
+    public function wishlist_delete()
+    {
+        // Users from a data store e.g. database
+
+        $data_token = AUTHORIZATION::verify_token();
+
+        if ( isset($data_token['status']) && $data_token['status'] == 200 )
+        {
+            $data_user = null;
+
+            if ( array_key_exists('data', $data_token['result']) )
+            {
+                $data_user = $data_token['result']['data']->user;
+            }
+
+            if ( !empty($data_user) )
+            {
+                $user_id = $data_user->id;
+                $user_type = $data_user->type;
+
+                $id = $this->uri->segment(4);
+
+                $wishlist = $this->Wishlist_Model->read_first($id);
+
+                if ( is_object($wishlist) && !empty($wishlist) )
+                {
+                    // verify data is belong to the current login user 
+                    if ( $user_id == $wishlist->user_id )
+                    {
+                        if ( empty($wishlist->deleted_at) )
+                        {
+                            $total_delete = $this->Wishlist_Model->delete_data($id, $user_id);
+
+                            if ( $total_delete > 0 )
+                            {
+                                $filter_wishlist_item = array('wishlist_id' => $id);
+                                $total_delete_item = $this->WishlistItem_Model->delete_data_multiple($filter_wishlist_item, $user_id);
+
+                                $status = 200;
+                                $result = array(
+                                                'status'    => true,
+                                                'message'   => 'Wishlist deleted successfully',
+                                                'data'      => array(
+                                                                    'total_delete'      => $total_delete,
+                                                                    'total_delete_item' => $total_delete_item
+                                                                    )
+                                                );
+                            }
+                            else
+                            {
+                                $status = 502;
+                                $result = array(
+                                                'status'    => false,
+                                                'message'   => 'Wishlist delete failed'
+                                                );
+                            }
+                        }
+                        else
+                        {
+                            $status = 200;
+                            $result = array(
+                                            'status'    => true,
+                                            'message'   => 'Data has been deleted'
+                                            );
+                        }
+                    }
+                    else
+                    {
+                        $status = 403;
+                        $result = array(
+                                        'status'    => false,
+                                        'message'   => 'Unauthorized access!'
+                                        );
+                    }
+                }
+                else
+                {
+                    $status = 404;
+                    $result = array(
+                                    'status'    => false,
+                                    'message'   => 'Data not found!'
+                                    );
+                }
+
+                $filter_wishlist = array();
+
+                if ( !in_array( $user_type, array(1,2) ) )
+                {
+                    // not superadmin & admin user
+                    $filter_wishlist['user_id'] = $user_id;
+                }
+
+                if ( !empty($id) )
+                {
+                    $filter_wishlist['id'] = $id;
+                }
+            }
+            else
+            {
+                $status = 403;
+                $result = array(
+                                'status'    => false,
+                                'message'   => 'Unauthorized access!'
+                                );
+            }
+
+            return $this->response($result, $status);
+        }
+        else
+        {
+            $this->response($data_token['result'], $data_token['status']);   
+        }
+    }
 }
