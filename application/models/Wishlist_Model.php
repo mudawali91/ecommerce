@@ -9,6 +9,7 @@ class Wishlist_Model extends CI_Model
 		$db = $this->db;
 		$db->select('*');
 		$db->where($this->primary_key, $id);
+		$db->where('deleted_at IS NULL', NULL, FALSE);
 		$db->limit(1);
 		$rst = $db->get($this->table)->row();
 

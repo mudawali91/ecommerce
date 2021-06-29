@@ -174,8 +174,6 @@ class Wishlist_Controller extends RestController
                                                     'data'      => $data_wishlist
                                                     );
                                 }
-
-
                             }
                         }
                         else
@@ -337,7 +335,239 @@ class Wishlist_Controller extends RestController
                                         );
                     }
                 }
+            }
+            else
+            {
+                $status = 403;
+                $result = array(
+                                'status'    => false,
+                                'message'   => 'Unauthorized access!'
+                                );
+            }
 
+            return $this->response($result, $status);
+        }
+        else
+        {
+            $this->response($data_token['result'], $data_token['status']);   
+        }
+    }
+
+    public function wishlist_put()
+    {
+        $data_token = AUTHORIZATION::verify_token();
+
+        if ( isset($data_token['status']) && $data_token['status'] == 200 )
+        {
+            $data_user = null;
+
+            if ( array_key_exists('data', $data_token['result']) )
+            {
+                $data_user = $data_token['result']['data']->user;
+            }
+
+            if ( !empty($data_user) )
+            {
+                $user_id = $data_user->id;
+                $user_type = $data_user->type;
+
+                $id = $this->uri->segment(4);
+
+                $wishlist = $this->Wishlist_Model->read_first($id);
+
+                if ( is_object($wishlist) && !empty($wishlist) )
+                {
+                    // verify data is belong to the current login user 
+                    if ( $user_id == $wishlist->user_id )
+                    {
+                        $request_json = $this->input->raw_input_stream; // file_get_contents('php://input');
+                
+                        if ( !empty($request_json) )
+                        {
+                            $request_arr = json_decode($request_json, true);
+
+                            if ( is_array($request_arr) )
+                            {
+                                $validation_error = array();
+
+                                if ( !isset($request_arr['title']) || empty($request_arr['title']) )
+                                {
+                                    $validation_error['title'] = 'Title is empty';
+                                }
+
+                                $item_arr = isset($request_arr['items']) ? $request_arr['items'] : array();
+
+                                if ( count($item_arr) == 0 )
+                                {
+                                    $validation_error['items'] = 'Item is empty. Select at least one item';
+                                }
+                                else
+                                {
+                                    foreach ( $item_arr as $key_p => $val_p )
+                                    {
+                                        if ( !isset($val_p['product_id']) || empty($val_p['product_id']) )
+                                        {
+                                            $validation_error['items'][$key_p] = 'Selected item not found';
+                                        }
+                                    } 
+                                }
+
+                                if ( count($validation_error) > 0 )
+                                {
+                                    $status = 400;
+                                    $result = array(
+                                                    'status'    => false,
+                                                    'message'   => (object)$validation_error
+                                                    );
+                                }
+                                else
+                                {
+                                    $data_update = array(
+                                                        'title'         => $request_arr['title'],
+                                                        'updated_at'    => getDateTime(),
+                                                        'updated_by'    => $user_id
+                                                        );
+
+                                    $total_update = $this->Wishlist_Model->update_data($id, $data_update);
+
+                                    if ( $total_update > 0 )
+                                    {
+                                        $data_create_item = array();
+                                        $data_update_item = array();
+                                        $data_delete_item = array();
+
+                                        foreach ( $request_arr['items'] as $key_p => $val_p )
+                                        {
+                                            $wishlist_item_id = ( isset($val_p['id']) ? $val_p['id'] : null);
+                                            $product_id = $val_p['product_id'];
+                                            $color = ( isset($val_p['color']) ? $val_p['color'] : null);
+                                            $size = ( isset($val_p['size']) ? $val_p['size'] : null);
+                                            $remark = ( isset($val_p['remark']) ? $val_p['remark'] : null);
+                                            $delete = ( isset($val_p['delete']) ? $val_p['delete'] : null); 
+
+                                            if ( empty($wishlist_item_id) )
+                                            {
+                                                // insert item those not supply the id
+                                                $data_create_item[] = array(
+                                                                            'wishlist_id'       => $id,
+                                                                            'product_id'        => $product_id,
+                                                                            'color'             => $color,
+                                                                            'size'              => $size,
+                                                                            'remark'            => $remark,
+                                                                            'created_at'        => getDateTime(),
+                                                                            'created_by'        => $user_id,
+                                                                            'updated_at'        => getDateTime(),
+                                                                            'updated_by'        => $user_id
+                                                                            );
+                                            }
+                                            else
+                                            {
+                                                if ( strtoupper($delete) == 'Y' )
+                                                {
+                                                    // delete item those got supply the id and delete
+                                                    $data_delete_item[] = array(
+                                                                                'id'                => $wishlist_item_id,
+                                                                                'deleted_at'        => getDateTime(),
+                                                                                'deleted_by'        => $user_id,
+                                                                                );
+                                                }
+                                                else
+                                                {
+                                                    // update item those got supply the id
+                                                    $data_update_item[] = array(
+                                                                                'id'                => $wishlist_item_id,
+                                                                                'color'             => $color,
+                                                                                'size'              => $size,
+                                                                                'remark'            => $remark,
+                                                                                'updated_at'        => getDateTime(),
+                                                                                'updated_by'        => $user_id,
+                                                                                );
+                                                }
+                                            }
+                                        }
+
+                                        $total_create_item = 0;
+                                        $total_update_item = 0;
+                                        $total_delete_item = 0;
+
+                                        if ( count($data_create_item) > 0 )
+                                        {
+                                            $total_create_item = $this->WishlistItem_Model->create_data_multiple($data_create_item);
+                                        }
+
+                                        if ( count($data_update_item) > 0 )
+                                        {
+                                            $filter_wishlist_item = array('wishlist_id' => $id);
+                                            $total_update_item = $this->WishlistItem_Model->update_data_multiple($filter_wishlist_item, $data_update_item);
+                                        }
+
+                                        if ( count($data_delete_item) > 0 )
+                                        {
+                                            $filter_wishlist_item = array('wishlist_id' => $id);
+                                            $total_delete_item = $this->WishlistItem_Model->update_data_multiple($filter_wishlist_item, $data_delete_item);
+                                        }
+
+                                        // to set id as 1st element
+                                        $data_wishlist = array_merge( 
+                                                                        array('id' => $id), 
+                                                                        $data_update, 
+                                                                        array('total_create_item' => $total_create_item), 
+                                                                        array('total_update_item' => $total_update_item),
+                                                                        array('total_delete_item' => $total_delete_item) 
+                                                                    );
+
+                                        $status = 200;
+                                        $result = array(
+                                                        'status'    => true,
+                                                        'message'   => 'Wishlist updated successfully',
+                                                        'data'      => $data_wishlist
+                                                        );
+                                    }
+                                    else
+                                    {
+                                        $status = 502;
+                                        $result = array(
+                                                        'status'    => false,
+                                                        'message'   => 'Wishlist update failed'
+                                                        );
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                $status = 400;
+                                $result = array(
+                                                'status'    => false,
+                                                'message'   => 'Invalid request'
+                                                );
+                            }
+                        }
+                        else
+                        {
+                            $status = 400;
+                            $result = array(
+                                            'status'    => false,
+                                            'message'   => 'Invalid request'
+                                            );
+                        }
+                    }
+                    else
+                    {
+                        $status = 403;
+                        $result = array(
+                                        'status'    => false,
+                                        'message'   => 'Unauthorized access!'
+                                        );
+                    }
+                }
+                else
+                {
+                    $status = 404;
+                    $result = array(
+                                    'status'    => false,
+                                    'message'   => 'Data not found!'
+                                    );
+                }
             }
             else
             {

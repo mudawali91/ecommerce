@@ -9,6 +9,7 @@ class WishlistItem_Model extends CI_Model
 		$db = $this->db;
 		$db->select('*');
 		$db->where($this->primary_key, $id);
+		$db->where('deleted_at IS NULL', NULL, FALSE);
 		$db->limit(1);
 		$rst = $db->get($this->table)->row();
 
@@ -73,6 +74,31 @@ class WishlistItem_Model extends CI_Model
 		
 		return $rst;
 	}
+
+	public function update_data_multiple($filters=array(), $data)
+	{	
+		$db = $this->db;
+
+		if ( count($filters) > 0 )
+		{
+			foreach ( $filters as $key => $val )
+			{
+				if ( is_array($val) && count($val) > 0 )
+				{
+					$db->where_in($key, $val);	
+				}
+				else
+				{
+					$db->where($key, $val);	
+				}	
+			}
+		}
+
+		$db->where('deleted_at IS NULL', NULL, FALSE);
+		$rst = $db->update_batch($this->table, $data, $this->primary_key);
+		
+		return $rst;
+	}
 	
 	public function delete_data($id, $deleted_by)
 	{
@@ -116,6 +142,7 @@ class WishlistItem_Model extends CI_Model
 				}
 			}
 
+			$db->where('deleted_at IS NULL', NULL, FALSE);
 			$db->update($this->table, $data);
 			$rst = $db->affected_rows();
 		}

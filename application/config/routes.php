@@ -60,4 +60,5 @@ $route['api/(:any)/login']['POST'] = 'api/$1/Auth_Controller/login';
 $route['api/(:any)/wishlist/add']['POST'] = 'api/$1/Wishlist_Controller/wishlist';
 $route['api/(:any)/wishlist']['GET'] = 'api/$1/Wishlist_Controller/wishlist';
 $route['api/(:any)/wishlist/(:num)']['GET'] = 'api/$1/Wishlist_Controller/wishlist/$2';
+$route['api/(:any)/wishlist/(:num)/update']['PUT'] = 'api/$1/Wishlist_Controller/wishlist/$2';
 $route['api/(:any)/wishlist/(:num)/delete']['DELETE'] = 'api/$1/Wishlist_Controller/wishlist/$2';
