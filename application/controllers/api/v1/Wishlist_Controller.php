@@ -24,16 +24,18 @@ class Wishlist_Controller extends RestController
 
         if ( isset($data_token['status']) && $data_token['status'] == 200 )
         {
-            $user_id = 0;
+            $data_user = null;
 
             if ( array_key_exists('data', $data_token['result']) )
             {
                 $data_user = $data_token['result']['data']->user;
-                $user_id = $data_user->id;
             }
 
-            if ( $user_id > 0 )
+            if ( !empty($data_user) )
             {
+                $user_id = $data_user->id;
+                $user_type = $data_user->type;
+
                 $request_json = $this->input->raw_input_stream; // file_get_contents('php://input');
                 
                 if ( !empty($request_json) )
@@ -147,7 +149,7 @@ class Wishlist_Controller extends RestController
                                         $data_wishlist['success'][$key_r][] = array_merge( 
                                                                                             array('id' => $wishlist_id), 
                                                                                             $data_create, 
-                                                                                            array('total_item' => $total_create_item) 
+                                                                                            array('total_create_item' => $total_create_item) 
                                                                                         );
                                     }
                                     else
@@ -161,7 +163,7 @@ class Wishlist_Controller extends RestController
                                     $status = 200;
                                     $result = array(
                                                     'status'    => true,
-                                                    'message'   => 'Wishlist saved successfully',
+                                                    'message'   => 'Wishlist added successfully',
                                                     'data'      => $data_wishlist
                                                     );
                                 }
@@ -170,8 +172,7 @@ class Wishlist_Controller extends RestController
                                     $status = 502;
                                     $result = array(
                                                     'status'    => false,
-                                                    'message'   => 'Wishlist save failed',
-                                                    'data'      => $data_wishlist
+                                                    'message'   => 'Wishlist add failed'
                                                     );
                                 }
                             }
@@ -222,8 +223,6 @@ class Wishlist_Controller extends RestController
 
 	public function wishlist_get()
     {
-        // Users from a data store e.g. database
-
         $data_token = AUTHORIZATION::verify_token();
 
         if ( isset($data_token['status']) && $data_token['status'] == 200 )
@@ -588,8 +587,6 @@ class Wishlist_Controller extends RestController
 
     public function wishlist_delete()
     {
-        // Users from a data store e.g. database
-
         $data_token = AUTHORIZATION::verify_token();
 
         if ( isset($data_token['status']) && $data_token['status'] == 200 )
@@ -624,14 +621,16 @@ class Wishlist_Controller extends RestController
                                 $filter_wishlist_item = array('wishlist_id' => $id);
                                 $total_delete_item = $this->WishlistItem_Model->delete_data_multiple($filter_wishlist_item, $user_id);
 
+                                $data_wishlist = array(
+                                                        'total_delete'      => $total_delete,
+                                                        'total_delete_item' => $total_delete_item
+                                                        );
+
                                 $status = 200;
                                 $result = array(
                                                 'status'    => true,
                                                 'message'   => 'Wishlist deleted successfully',
-                                                'data'      => array(
-                                                                    'total_delete'      => $total_delete,
-                                                                    'total_delete_item' => $total_delete_item
-                                                                    )
+                                                'data'      => $data_wishlist
                                                 );
                             }
                             else
