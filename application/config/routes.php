@@ -54,3 +54,5 @@ $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
 $route['home'] = 'Home_Controller/index';
+
+$route['api/(:any)/login']['POST'] = 'api/$1/Auth_Controller/login';
