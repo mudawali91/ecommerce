@@ -25,7 +25,14 @@ class WishlistItem_Model extends CI_Model
 		{
 			foreach ( $filters as $key => $val )
 			{
-				$db->where($key, $val);	
+				if ( is_array($val) && count($val) > 0 )
+				{
+					$db->where_in($key, $val);	
+				}
+				else
+				{
+					$db->where($key, $val);	
+				}	
 			}	
 		}
 		

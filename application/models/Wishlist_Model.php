@@ -15,7 +15,7 @@ class Wishlist_Model extends CI_Model
 		return $rst;
 	}
 
-	public function read_all($filters=array())
+	public function read_all($filters=array(), $limit=0, $offset=0)
 	{
 		$db = $this->db;
 		$db->select('*');
@@ -28,9 +28,29 @@ class Wishlist_Model extends CI_Model
 				$db->where($key, $val);	
 			}	
 		}
-		
-		$db->order_by('updated_at', 'DESC');
-		$rst = $db->get($this->table)->result();
+
+		if ( array_key_exists('id', $filters) )
+		{
+			// get single data
+			$db->limit(1);
+			$rst = $db->get($this->table)->row();
+		}
+		else
+		{
+			// get multiple data
+			$db->order_by('updated_at', 'DESC');
+			
+			if ( (int)$limit > 0 && (int)$offset > 0 )
+			{
+				$db->limit($limit, $offset);	
+			}
+			else
+			{
+				$db->limit($limit);
+			}
+
+			$rst = $db->get($this->table)->result();
+		}
 
 		return $rst;
 	}

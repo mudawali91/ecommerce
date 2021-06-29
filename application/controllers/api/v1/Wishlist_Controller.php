@@ -222,4 +222,138 @@ class Wishlist_Controller extends RestController
             return $this->response($data_token['result'], $data_token['status']);   
         }
     }
+
+	public function wishlist_get()
+    {
+        // Users from a data store e.g. database
+
+        $data_token = AUTHORIZATION::verify_token();
+
+        if ( isset($data_token['status']) && $data_token['status'] == 200 )
+        {
+            $data_user = null;
+
+            if ( array_key_exists('data', $data_token['result']) )
+            {
+                $data_user = $data_token['result']['data']->user;
+            }
+
+            if ( !empty($data_user) )
+            {
+                $user_id = $data_user->id;
+                $user_type = $data_user->type;
+
+                $filter_wishlist = array();
+
+                if ( !in_array( $user_type, array(1,2) ) )
+                {
+                    // not superadmin & admin user
+                    $filter_wishlist['user_id'] = $user_id;
+                }
+
+                $id = $this->uri->segment(4);
+                $page = $this->input->get('page');
+                $limit = $this->input->get('limit');
+                $offset = ((int)$page * (int)$limit) - (int)$limit;
+
+                $validation_error = array();
+
+                if ( isset($page) )
+                {
+                    // if page used, its value must integer and greater than zero
+                    if ( is_numeric($page) == false || (int)$page <= 0 )
+                    {
+                        $validation_error['page'] = 'Page value must be an integer and minimum is 1';
+                    }
+                }
+
+                if ( isset($limit) )
+                {
+                    // if limit used, its value must integer and greater than zero
+                    if ( is_numeric($limit) == false || (int)$limit <= 0 )
+                    {
+                        $validation_error['limit'] = 'Limit value must be an integer and minimum is 1';
+                    }
+                }
+
+                if ( isset($limit) || isset($page) )
+                {
+                     // if page used, limit should be used also
+                    if ( (int)$page > 0 && (int)$limit <= 0 )
+                    {
+                        $validation_error['limit'] = 'Limit is required, value must be an integer and minimum is 1';   
+                    }
+                }
+
+                if ( count($validation_error) > 0 )
+                {
+                    $status = 400;
+                    $result = array(
+                                    'status'    => false,
+                                    'message'   => (object)$validation_error
+                                    );
+                }
+                else
+                {
+                    if ( !empty($id) )
+                    {
+                        $filter_wishlist['id'] = $id;
+                    }
+                        
+                    $wishlist = $this->Wishlist_Model->read_all($filter_wishlist, $limit, $offset);
+
+                    if ( !empty($wishlist) )
+                    {
+                        if ( is_array($wishlist) )
+                        {
+                            foreach ( $wishlist as $key => $val )
+                            {
+                                $filter_wishlist_item = array('wishlist_id' => $val->id);
+                                $wishlist_item = $this->WishlistItem_Model->read_all($filter_wishlist_item); 
+                                $wishlist[$key]->items = $wishlist_item;
+                            }
+                        }
+                        else if ( is_object($wishlist) )
+                        {
+                            $filter_wishlist_item = array('wishlist_id' => $wishlist->id);
+                            $wishlist_item = $this->WishlistItem_Model->read_all($filter_wishlist_item);
+                            $wishlist->items = $wishlist_item;
+                        }
+
+                        $data_wishlist = $wishlist;
+
+                        $status = 200;
+                        $result = array(
+                                        'status'    => true,
+                                        'message'   => 'Success',
+                                        'data'      => $data_wishlist
+                                        );
+                    }
+                    else
+                    {
+                        $status = 404;
+                        $result = array(
+                                        'status'    => false,
+                                        'message'   => 'Data not found!'
+                                        );
+                    }
+                }
+
+            }
+            else
+            {
+                $status = 403;
+                $result = array(
+                                'status'    => false,
+                                'message'   => 'Unauthorized access!'
+                                );
+            }
+
+            return $this->response($result, $status);
+        }
+        else
+        {
+            $this->response($data_token['result'], $data_token['status']);   
+        }
+    }
 }
