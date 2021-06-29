@@ -308,14 +308,14 @@ class Wishlist_Controller extends RestController
                         {
                             foreach ( $wishlist as $key => $val )
                             {
-                                $filter_wishlist_item = array('wishlist_id' => $val->id);
+                                $filter_wishlist_item = array('a.wishlist_id' => $val->id);
                                 $wishlist_item = $this->WishlistItem_Model->read_all($filter_wishlist_item); 
                                 $wishlist[$key]->items = $wishlist_item;
                             }
                         }
                         else if ( is_object($wishlist) )
                         {
-                            $filter_wishlist_item = array('wishlist_id' => $wishlist->id);
+                            $filter_wishlist_item = array('a.wishlist_id' => $wishlist->id);
                             $wishlist_item = $this->WishlistItem_Model->read_all($filter_wishlist_item);
                             $wishlist->items = $wishlist_item;
                         }

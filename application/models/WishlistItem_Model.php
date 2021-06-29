@@ -18,8 +18,13 @@ class WishlistItem_Model extends CI_Model
 	public function read_all($filters=array())
 	{
 		$db = $this->db;
-		$db->select('*');
-		$db->where('deleted_at IS NULL', NULL, FALSE);
+		$db->select('a.id, a.wishlist_id, a.color, a.size, a.remark, a.product_id, b.sku AS product_sku, b.name AS product_name, b.product_brand_id, c.description AS product_brand, b.product_category_id, d.description AS product_category, CONCAT(\''.base_url().PRODUCT_PATH.'\', e.image) AS product_image');
+		$db->from($this->table.' a');
+		$db->join('product b', 'b.id = a.product_id', 'LEFT');
+		$db->join('product_brand c', 'c.id = b.product_brand_id', 'LEFT');
+		$db->join('product_category d', 'd.id = b.product_category_id', 'LEFT');
+		$db->join('product_color e', 'e.product_id = a.product_id AND e.color = a.color', 'LEFT');
+		$db->where('a.deleted_at IS NULL', NULL, FALSE);
 
 		if ( count($filters) > 0 )
 		{
@@ -36,8 +41,8 @@ class WishlistItem_Model extends CI_Model
 			}	
 		}
 		
-		$db->order_by('updated_at', 'DESC');
-		$rst = $db->get($this->table)->result();
+		$db->order_by('a.updated_at', 'DESC');
+		$rst = $db->get()->result();
 
 		return $rst;
 	}
