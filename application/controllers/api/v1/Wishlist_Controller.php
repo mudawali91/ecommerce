@@ -79,7 +79,7 @@ class Wishlist_Controller extends RestController
                                     {
                                         if ( !isset($val_p['product_id']) || empty($val_p['product_id']) )
                                         {
-                                            $validation_error[$v]['items'][$key_p] = 'Item selected not found';
+                                            $validation_error[$v]['items'][$key_p] = 'Selected item not found';
                                         }
                                     } 
                                 }
@@ -145,11 +145,10 @@ class Wishlist_Controller extends RestController
 
                                         // to set id as 1st element
                                         $data_wishlist['success'][$key_r][] = array_merge( 
-                                                                                                            array('id' => $wishlist_id), 
-                                                                                                            $data_create, 
-                                                                                                            array('total_item' => $total_create_item) 
-                                                                                                        );
-
+                                                                                            array('id' => $wishlist_id), 
+                                                                                            $data_create, 
+                                                                                            array('total_item' => $total_create_item) 
+                                                                                        );
                                     }
                                     else
                                     {
@@ -171,7 +170,7 @@ class Wishlist_Controller extends RestController
                                     $status = 502;
                                     $result = array(
                                                     'status'    => false,
-                                                    'message'   => 'Wishlist saved failed',
+                                                    'message'   => 'Wishlist save failed',
                                                     'data'      => $data_wishlist
                                                     );
                                 }
@@ -243,14 +242,6 @@ class Wishlist_Controller extends RestController
                 $user_id = $data_user->id;
                 $user_type = $data_user->type;
 
-                $filter_wishlist = array();
-
-                if ( !in_array( $user_type, array(1,2) ) )
-                {
-                    // not superadmin & admin user
-                    $filter_wishlist['user_id'] = $user_id;
-                }
-
                 $id = $this->uri->segment(4);
                 $page = $this->input->get('page');
                 $limit = $this->input->get('limit');
@@ -295,6 +286,14 @@ class Wishlist_Controller extends RestController
                 }
                 else
                 {
+                    $filter_wishlist = array();
+
+                    if ( !in_array( $user_type, array(1,2) ) )
+                    {
+                        // not superadmin & admin user
+                        $filter_wishlist['user_id'] = $user_id;
+                    }
+
                     if ( !empty($id) )
                     {
                         $filter_wishlist['id'] = $id;
