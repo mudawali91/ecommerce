@@ -153,7 +153,7 @@ class Wishlist_Controller extends RestController
                                         }
 
                                         // to set id as 1st element
-                                        $data_wishlist['success'][$key_r][] = array_merge( 
+                                        $data_wishlist['success'][$key_r] = array_merge( 
                                                                                             array('id' => $wishlist_id), 
                                                                                             $data_create, 
                                                                                             array('total_create_item' => $total_create_item) 
@@ -161,7 +161,7 @@ class Wishlist_Controller extends RestController
                                     }
                                     else
                                     {
-                                        $data_wishlist['fail'][$key_r][] = $data_create;
+                                        $data_wishlist['fail'][$key_r] = $data_create;
                                     }
                                 }
 
@@ -654,9 +654,9 @@ class Wishlist_Controller extends RestController
                         }
                         else
                         {
-                            $status = 200;
+                            $status = 409;
                             $result = array(
-                                            'status'    => true,
+                                            'status'    => false,
                                             'message'   => 'Data has been deleted'
                                             );
                         }
