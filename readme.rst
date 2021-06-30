@@ -1,51 +1,70 @@
-# E-Commerce RESTful API
+###################
+What is CodeIgniter
+###################
 
-E-commerce project built with PHP CodeIgniter version 3.1.11. 
+CodeIgniter is an Application Development Framework - a toolkit - for people
+who build web sites using PHP. Its goal is to enable you to develop projects
+much faster than you could if you were writing code from scratch, by providing
+a rich set of libraries for commonly needed tasks, as well as a simple
+interface and logical structure to access these libraries. CodeIgniter lets
+you creatively focus on your project by minimizing the amount of code needed
+for a given task.
 
-## Release Information
+*******************
+Release Information
+*******************
 
-Currently the project is version 1 which is built to cover Wishlist and User Authentication modules.
+This repo contains in-development code for future releases. To download the
+latest stable release please visit the `CodeIgniter Downloads
+<https://codeigniter.com/download>`_ page.
 
----
-## Table of Contents
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Resources](#resources)
----
+**************************
+Changelog and New Features
+**************************
 
-## Requirements
-- PHP 7.0 or above
-- [CodeIgniter 3](https://codeigniter.com/userguide3/index.html)
-- [Composer](https://getcomposer.org/doc/00-intro.md)
+You can find a list of all changes for each release in the `user
+guide change log <https://github.com/bcit-ci/CodeIgniter/blob/develop/user_guide_src/source/changelog.rst>`_.
 
-## Installation
+*******************
+Server Requirements
+*******************
 
-1. Download or clone this repository to you server directory.
-2. Use composer to download JSON Web Token (JWT) package from [Firebase/PHP-JWT](https://github.com/firebase/php-jwt):
-```
-composer require firebase/php-jwt
-```
-3. Use composer to download RESTful API package from [chriskacerguis
-codeigniter-restserver](https://github.com/chriskacerguis/codeigniter-restserver):
-```
-composer require chriskacerguis/codeigniter-restserver
-```
-4. Download `ecommerce.sql` file under the project root and import to your `mysql` database. Setup your own database name, username and password.
+PHP version 5.6 or newer is recommended.
 
-5. Configure your CodeIgniter framework
-```
-1. application/config/config.php
-   1.1. $config['base_url'] = 'http://{server domain}/ecommerce/'
-   1.2. $config['composer_autoload'] = FCPATH . '/vendor/autoload.php' or depends to your package folder installation.
+It should work on 5.3.7 as well, but we strongly advise you NOT to run
+such old versions of PHP, because of potential security and performance
+issues, as well as missing features.
 
-2. application/config/database.php
-   2.1. hostname = {database server host}
-   2.2. username = {database username}
-   2.3. password = {database password}
-   2.4. database = {database name}
-```
+************
+Installation
+************
 
-## Resources
-- [CodeIgniter 3.1.11](https://codeigniter.com/userguide3/index.html)
-- [Firebase/PHP-JWT](https://github.com/chriskacerguis/codeigniter-restserver)
-- [RESTful API](https://github.com/chriskacerguis/codeigniter-restserver)
+Please see the `installation section <https://codeigniter.com/user_guide/installation/index.html>`_
+of the CodeIgniter User Guide.
+
+*******
+License
+*******
+
+Please see the `license
+agreement <https://github.com/bcit-ci/CodeIgniter/blob/develop/user_guide_src/source/license.rst>`_.
+
+*********
+Resources
+*********
+
+-  `User Guide <https://codeigniter.com/docs>`_
+-  `Language File Translations <https://github.com/bcit-ci/codeigniter3-translations>`_
+-  `Community Forums <http://forum.codeigniter.com/>`_
+-  `Community Wiki <https://github.com/bcit-ci/CodeIgniter/wiki>`_
+-  `Community Slack Channel <https://codeigniterchat.slack.com>`_
+
+Report security issues to our `Security Panel <mailto:security@codeigniter.com>`_
+or via our `page on HackerOne <https://hackerone.com/codeigniter>`_, thank you.
+
+***************
+Acknowledgement
+***************
+
+The CodeIgniter team would like to thank EllisLab, all the
+contributors to the CodeIgniter project and you, the CodeIgniter user.
