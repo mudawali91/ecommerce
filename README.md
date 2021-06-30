@@ -23,7 +23,7 @@ codeigniter-restserver](https://github.com/chriskacerguis/codeigniter-restserver
 ```
 composer require chriskacerguis/codeigniter-restserver
 ```
-> The packages will installed under the `vendor` folder created at your project root
+> The packages will be installed under the `vendor` folder created at your project root
 
 5. Create a folder named `public` under project root and create sub folder named `ci_sessions` to store the codeigniter sessions file.
 
