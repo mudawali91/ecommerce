@@ -64,9 +64,15 @@ class Wishlist_Controller extends RestController
 
                             for ( $v = 0; $v < $wishlist_total; $v++ )
                             {
+                                $request_arr[$v]['title'] = isset($request_arr[$v]['title']) ? trim($request_arr[$v]['title']) : null;
+
                                 if ( !isset($request_arr[$v]['title']) || empty($request_arr[$v]['title']) )
                                 {
                                     $validation_error[$v]['title'] = 'Title is empty';
+                                }
+                                else if ( strlen($request_arr[$v]['title']) > 100 )
+                                {
+                                    $validation_error[$v]['title'] = 'Title exceed maximum character';
                                 }
 
                                 // item is compulsory during add and product should valid
@@ -390,9 +396,15 @@ class Wishlist_Controller extends RestController
                             {
                                 $validation_error = array();
 
+                                $request_arr['title'] = isset($request_arr['title']) ? trim($request_arr['title']) : null;
+
                                 if ( !isset($request_arr['title']) || empty($request_arr['title']) )
                                 {
                                     $validation_error['title'] = 'Title is empty';
+                                }
+                                else if ( strlen($request_arr['title']) > 100 )
+                                {
+                                    $validation_error['title'] = 'Title exceed maximum character';
                                 }
 
                                 // item not compulsory during update, if supply then product must be valid
