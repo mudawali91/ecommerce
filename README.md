@@ -23,15 +23,20 @@ codeigniter-restserver](https://github.com/chriskacerguis/codeigniter-restserver
 ```
 composer require chriskacerguis/codeigniter-restserver
 ```
-4. Download `ecommerce.sql` file under the project root and import to your `mysql` database. Setup your own database `name`, `username` and `password`.
+> The packages will installed under the `vendor` folder created at your project root
 
-5. Configure your CodeIgniter framework
+5. Create a folder named `public` under project root and create sub folder named `ci_sessions` to store the codeigniter sessions file.
+
+6. Configure your directory and path:
 
    **application/config/config.php**
    ```
-   $config['base_url'] = 'http://{server domain}/ecommerce/'
-   $config['composer_autoload'] = FCPATH . '/vendor/autoload.php' or depends to your package folder installation.
+   $config['base_url'] = 'http://{domain-name}/ecommerce/'; // depends to your server url
+   $config['composer_autoload'] = FCPATH . '/vendor/autoload.php'; // depends to your package folder location
+   $config['sess_save_path'] = FCPATH . 'public/ci_sessions'; // depends to your own folder location
    ```
+7. Download `ecommerce.sql` file under the project root and import to your `mysql` database. Setup your own database `name`, `username` and `password`. Configure the database connection as follows: 
+
    **application/config/database.php**
    ```
    hostname = 'localhost' // database server host
