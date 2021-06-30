@@ -52,30 +52,43 @@ class Auth_Controller extends RestController
             // check user login success before generate access token 
             if ( $rst_login > 0 ) 
             {
-                $access_token = $this->generate_token($data_user);
+                $is_already_logged_in = $this->is_already_logged_in($rst_login);
 
-                if ( !empty($access_token) )
-                {
-                    $data = array(
-                                'user'          => $data_user,
-                                'access token'  => $access_token
-                                );
-
+                if ( $is_already_logged_in === true )
+                {   
                     $status = 200;
                     $result = array(
                                     'status'    => true,
-                                    'message'   => 'User logged in successfully',
-                                    'data'      => $data
+                                    'message'   => 'User already logged in'
                                     );
                 }
                 else
                 {
-                    $status = 401;
-                    $result = array(
-                                    'status'    => false,
-                                    'message'   => 'Invalid token generated',
-                                    'access token' => $access_token
+                    $access_token = $this->generate_token($data_user);
+
+                    if ( !empty($access_token) )
+                    {
+                        $data = array(
+                                    'user'          => $data_user,
+                                    'access token'  => $access_token
                                     );
+
+                        $status = 200;
+                        $result = array(
+                                        'status'    => true,
+                                        'message'   => 'User logged in successfully',
+                                        'data'      => $data
+                                        );
+                    }
+                    else
+                    {
+                        $status = 401;
+                        $result = array(
+                                        'status'    => false,
+                                        'message'   => 'Invalid token generated',
+                                        'access token' => $access_token
+                                        );
+                    }
                 }
             }
             else
@@ -97,6 +110,20 @@ class Auth_Controller extends RestController
         }
 
         return $this->response($result, $status);
+    }
+
+    private function is_already_logged_in($id)
+    {
+        $access_log = $this->AccessLogs_Model->read_current_log($id);
+
+        if ( is_object($access_log) && !empty($access_log) )
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     private function generate_token($data)
