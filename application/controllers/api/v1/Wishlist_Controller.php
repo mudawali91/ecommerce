@@ -69,15 +69,16 @@ class Wishlist_Controller extends RestController
                                     $validation_error[$v]['title'] = 'Title is empty';
                                 }
 
-                                $product_arr = isset($request_arr[$v]['items']) ? $request_arr[$v]['items'] : array();
+                                // item is compulsory during add and product should valid
+                                $item_arr = isset($request_arr[$v]['items']) ? $request_arr[$v]['items'] : array();
 
-                                if ( count($product_arr) == 0 )
+                                if ( count($item_arr) == 0 )
                                 {
                                     $validation_error[$v]['items'] = 'Item is empty. Select at least one item';
                                 }
                                 else
                                 {
-                                    foreach ( $product_arr as $key_p => $val_p )
+                                    foreach ( $item_arr as $key_p => $val_p )
                                     {
                                         if ( !isset($val_p['product_id']) || empty($val_p['product_id']) )
                                         {
@@ -394,13 +395,10 @@ class Wishlist_Controller extends RestController
                                     $validation_error['title'] = 'Title is empty';
                                 }
 
+                                // item not compulsory during update, if supply then product must be valid
                                 $item_arr = isset($request_arr['items']) ? $request_arr['items'] : array();
 
-                                if ( count($item_arr) == 0 )
-                                {
-                                    $validation_error['items'] = 'Item is empty. Select at least one item';
-                                }
-                                else
+                                if ( count($item_arr) > 0 )
                                 {
                                     foreach ( $item_arr as $key_p => $val_p )
                                     {
