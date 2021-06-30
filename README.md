@@ -40,5 +40,5 @@ composer require chriskacerguis/codeigniter-restserver
 
 ## Resources
 - [CodeIgniter 3.1.11](https://codeigniter.com/userguide3/index.html)
-- [Firebase/PHP-JWT](https://github.com/chriskacerguis/codeigniter-restserver)
+- [Firebase/PHP-JWT](https://github.com/firebase/php-jwt)
 - [RESTful API](https://github.com/chriskacerguis/codeigniter-restserver)
