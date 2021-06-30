@@ -56,10 +56,10 @@ class Auth_Controller extends RestController
 
                 if ( $is_already_logged_in === true )
                 {   
-                    $status = 200;
+                    $status = 409;
                     $result = array(
-                                    'status'    => true,
-                                    'message'   => 'User already logged in'
+                                    'status'    => false,
+                                    'message'   => 'User already logged in or access token has been refreshed'
                                     );
                 }
                 else
@@ -85,8 +85,7 @@ class Auth_Controller extends RestController
                         $status = 401;
                         $result = array(
                                         'status'    => false,
-                                        'message'   => 'Invalid token generated',
-                                        'access token' => $access_token
+                                        'message'   => 'Invalid token generated'
                                         );
                     }
                 }
@@ -97,6 +96,98 @@ class Auth_Controller extends RestController
                 $result = array(
                                 'status'    => false,
                                 'message'   => 'Invalid Username or Password'
+                                );
+            }
+        }
+        else
+        {
+            $status = 400;
+            $result = array(
+                            'status'    => false,
+                            'message'   => (object)$validation_error
+                            );
+        }
+
+        return $this->response($result, $status);
+    }
+
+    public function refresh_token_get()
+    {
+        $refresh_token = $this->input->get('refresh_token');
+
+        $validation_error = array();
+
+        if ( empty($refresh_token) )
+        {
+            $validation_error['refresh_token'] = 'Refresh token is empty';
+        }
+
+        if ( count($validation_error) == 0 )
+        {
+            $refresh_token_decrypt = encryptor('decrypt', $refresh_token);
+            
+            $refresh_token_arr = array();
+
+            if ( !empty($refresh_token_decrypt) )
+            {
+                $refresh_token_arr = explode('%+-*/', $refresh_token_decrypt);
+            }
+            
+            if ( is_array($refresh_token_arr) && count($refresh_token_arr) > 0 )    
+            {
+                $user_id = ( isset($refresh_token_arr[0]) && !empty($refresh_token_arr[0]) ) ? $refresh_token_arr[0] : null;
+                
+                $data_user = $this->User_Model->read_first($user_id);
+
+                $refresh_token_start_int = ( isset($refresh_token_arr[1]) && !empty($refresh_token_arr[1]) ) ? $refresh_token_arr[1] : null;
+                $refresh_token_expired_int = ( isset($refresh_token_arr[2]) && !empty($refresh_token_arr[2]) ) ? $refresh_token_arr[2] : null;
+
+                $curr_datetime = new DateTimeImmutable();
+                $curr_datetime_int = $curr_datetime->getTimestamp();
+
+                // to check if the refresh token 
+                if ( !empty($data_user) && $curr_datetime_int > $refresh_token_start_int && $curr_datetime_int < $refresh_token_expired_int )
+                {
+                    $access_token = $this->generate_token($data_user);
+
+                    if ( !empty($access_token) )
+                    {
+                        $data = array(
+                                    'user'          => $data_user,
+                                    'access token'  => $access_token
+                                    );
+
+                        $status = 200;
+                        $result = array(
+                                        'status'    => true,
+                                        'message'   => 'New token generated successfully',
+                                        'data'      => $data
+                                        );
+                    }
+                    else
+                    {
+                        $status = 401;
+                        $result = array(
+                                        'status'    => false,
+                                        'message'   => 'Invalid token generated'
+                                        );
+                    }
+                }
+                else
+                {
+                    $status = 401;
+                    $result = array(
+                                    'status'    => false,
+                                    'message'   => 'Refresh token already expired, please login to continue.'
+                                    );
+                }
+            }
+            else
+            {
+                $status = 401;
+                $result = array(
+                                'status'    => false,
+                                'message'   => 'Invalid refresh token'
                                 );
             }
         }
@@ -145,18 +236,20 @@ class Auth_Controller extends RestController
             $curr_datetime = new DateTimeImmutable();
             $access_token_start = $curr_datetime;
             $access_token_start_int = $access_token_start->getTimestamp();
-            $access_token_expired = $curr_datetime->add( new DateInterval('PT60M') ); // access token expired within 5 minutes
+            $access_token_expired = $curr_datetime->add( new DateInterval('PT5M') ); // access token expired within 5 minutes
             $access_token_expired_int = $access_token_expired->getTimestamp();
 
-            $refresh_token = encryptor('encrypt', $id . ';' . $access_token_start_int . ';' . $access_token_expired_int );
             $refresh_token_start = $curr_datetime;
-            $refresh_token_expired = $curr_datetime->add( new DateInterval('P3M') ); // refresh token expired 3 months
+            $refresh_token_start_int = $refresh_token_start->getTimestamp();
+            $refresh_token_expired = $curr_datetime->add( new DateInterval('P3M') ); // refresh token expired within 3 months
+            $refresh_token_expired_int = $refresh_token_expired->getTimestamp();
+
+            $refresh_token = encryptor('encrypt', $id . '%+-*/' . $refresh_token_start_int . '%+-*/' . $refresh_token_expired_int );
 
             $payload = array(
                             'user'          => $data_user, 
                             'refresh_token' => $refresh_token, 
                             'iss'           => site_url(),
-                            'aud'           => site_url(),
                             'iat'           => $access_token_start_int,
                             'exp'           => $access_token_expired_int,
                             );

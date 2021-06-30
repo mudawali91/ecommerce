@@ -56,6 +56,7 @@ $route['translate_uri_dashes'] = FALSE;
 $route['home'] = 'Home_Controller/index';
 
 $route['api/(:any)/login']['POST'] = 'api/$1/Auth_Controller/login';
+$route['api/(:any)/refresh-token']['GET'] = 'api/$1/Auth_Controller/refresh_token';
 
 $route['api/(:any)/wishlist/add']['POST'] = 'api/$1/Wishlist_Controller/wishlist';
 $route['api/(:any)/wishlist']['GET'] = 'api/$1/Wishlist_Controller/wishlist';

@@ -7,6 +7,7 @@ class AUTHORIZATION
     public static function validate_token($token)
     {
         $CI =& get_instance();
+        JWT::$leeway = 60;
         return JWT::decode($token, $CI->config->item('jwt_secret_key'), array('HS256'));
     }
 
